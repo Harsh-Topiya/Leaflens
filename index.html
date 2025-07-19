@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Disease Detection</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        @font-face {
+            font-family: nb;
+            src: url('D:\SGP\Sem 6\SGP LeafLens New\SGP LeafLens New\NBInternationalProBoo.ttf');
+        }
+        @font-face {
+            font-family: rj;
+            src: url('D:\SGP\Sem 6\SGP LeafLens New\SGP LeafLens New\Rejouice-Headline.ttf');
+        }
+        :root {
+            --primary: #2e8b57;
+            --secondary: #57cc99;
+            --accent: #80ed99;
+            --light: #f1faee;
+            --dark: #1a472a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Floating Icons Animation */
+        .floating-icons {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .icon {
+            position: absolute;
+            color: #208b46;
+            opacity: 0.4;
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+            font-size: 1.5em;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            5% {
+                opacity: 0.3;
+            }
+            95% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Landing Page */
+        .landing-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #184e77, #1e6091, #1a759f, #168aad);
+            color: white;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .landing-content {
+            max-width: 800px;
+            padding: 2rem;
+        }
+
+        .landing-title {
+            font-family: 'rj';
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .landing-subtitle {
+            font-family: 'nb';
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .start-btn {
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            background-color: var(--accent);
+            border: none;
+            color: var(--dark);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .start-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .start-btn:active::after {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            transition: all 0s ease;
+        }
+
+        /* Main App */
+        .app-container {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            padding: 2rem 1rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 2rem;
+            color: white;
+            text-align: center;
+            position: relative;
+        }
+
+        .card-title {
+            font-family: 'nb';
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-subtitle {
+            font-family: 'rj';
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-decoration {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30%;
+            background: url('/api/placeholder/900/100') center/cover;
+            opacity: 0.1;
+            transform: scaleY(-1);
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .upload-container {
+            border: 2px dashed var(--secondary);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            background-color: rgba(87, 204, 153, 0.05);
+            position: relative;
+        }
+
+        .upload-container:hover {
+            border-color: var(--primary);
+            background-color: rgba(87, 204, 153, 0.1);
+        }
+
+        .upload-title {
+            font-family: 'rj';
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .upload-container:hover .upload-icon {
+            transform: scale(1.1);
+            color: var(--primary);
+        }
+
+        .upload-btn {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin: 1rem 0;
+            font-weight: 500;
+            box-shadow: 0 4px 10px rgba(46, 139, 87, 0.3);
+        }
+
+        .upload-btn:hover {
+            background-color: var(--dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(46, 139, 87, 0.4);
+        }
+
+        .preview-container {
+            margin: 1.5rem auto;
+            max-width: 350px;
+            position: relative;
+            display: none;
+            transition: all 0.3s ease;
+        }
+
+        .preview-img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .analyze-btn {
+            background-color: #1e88e5;
+            color: white;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin: 1.5rem 0 0.5rem;
+            font-weight: 500;
+            box-shadow: 0 4px 10px rgba(30, 136, 229, 0.3);
+            display: none;
+        }
+
+        .analyze-btn:hover {
+            background-color: #1565c0;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(30, 136, 229, 0.4);
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(46, 139, 87, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .result-container {
+            display: none;
+            margin-top: 2rem;
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #f5f7fa, #e4e7eb);
+            border-radius: 15px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .result-title {
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .result-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: var(--primary);
+        }
+
+        .result-content {
+            display: flex;
+            flex-direction: row;
+            gap: 2.5rem;
+            align-items: flex-start;
+        }
+
+        .result-img-container {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(30,136,229,0.10), 0 1.5px 8px rgba(46,139,87,0.08);
+            border: 2.5px solid #e0e0e0;
+            margin-bottom: 1.5rem;
+            background: #fff;
+        }
+
+        .result-img {
+            width: 100%;
+            min-height: 260px;
+            max-height: 400px;
+            object-fit: cover;
+            display: block;
+            border-radius: 16px;
+            background: #f6f6f6;
+        }
+
+        .result-details {
+            flex: 1;
+            min-width: 320px;
+        }
+
+        .detected-disease {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 1rem;
+            padding: 0.8rem 1.5rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            display: inline-block;
+        }
+
+        .confidence-bar-container {
+            width: 100%;
+            max-width: 300px;
+            margin: 1.5rem auto 0.5rem;
+            background: #e0e0e0;
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .confidence-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+            border-radius: 6px;
+            width: 0;
+            transition: width 1s ease-out;
+        }
+
+        .confidence-text {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--primary);
+            margin-top: 0.5rem;
+        }
+
+        .plant-info {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .plant-info-title {
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .treatment-tips {
+            margin-top: 1rem;
+        }
+
+        .tip-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.8rem;
+        }
+
+        .tip-icon {
+            color: var(--primary);
+            margin-right: 0.5rem;
+            font-size: 1rem;
+            margin-top: 0.2rem;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--dark);
+            font-size: 0.9rem;
+            margin-top: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .result-content {
+                flex-direction: row;
+                text-align: left;
+            }
+
+            .result-details {
+                text-align: left;
+            }
+
+            .detected-disease {
+                display: block;
+            }
+
+            .confidence-bar-container {
+                margin: 1.5rem 0 0.5rem;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .slide-up {
+            animation: slideUp 0.5s ease forwards;
+        }
+
+        @media (max-width: 480px) {
+            .landing-title {
+                font-size: 2.5rem;
+            }
+            
+            .landing-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .card-title {
+                font-size: 1.8rem;
+            }
+            
+            .card-subtitle {
+                font-size: 1rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .upload-container {
+                padding: 1.5rem 1rem;
+            }
+        }
+
+        /* Error Message Styles */
+        .error-message {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: none;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Enhanced Loading Animation */
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .loader-spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid rgba(46, 139, 87, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+
+        .loader-text {
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .loader-subtext {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .supplement-section {
+            margin-top: 2.5rem;
+            background: #f8fff8;
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 12px rgba(46,139,87,0.08);
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .supplement-title {
+            color: #208b46;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+        }
+        .supplement-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: flex-start;
+            width: 100%;
+        }
+        .supplement-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(30,136,229,0.07);
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            min-width: 320px;
+            max-width: 800px;
+            border: 1.5px solid #e0e0e0;
+            transition: box-shadow 0.2s;
+        }
+        .supplement-card:hover {
+            box-shadow: 0 6px 24px rgba(30,136,229,0.13);
+            border-color: #57cc99;
+        }
+        .supplement-img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            background: #f6f6f6;
+        }
+        .supplement-info {
+            flex: 1;
+        }
+        .supplement-name {
+            font-weight: 700;
+            color: #184e77;
+            margin-bottom: 0.3rem;
+            font-size: 1.08rem;
+        }
+        .supplement-link {
+            color: #1e6091;
+            text-decoration: underline;
+            font-size: 1rem;
+        }
+        .supplement-empty {
+            color: #c62828;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+        @media (max-width: 900px) {
+            .result-content {
+                flex-direction: column;
+                align-items: center;
+            }
+            .supplement-section {
+                padding: 1.2rem 0.5rem;
+            }
+            .supplement-list {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+        .back-btn {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin: 2rem auto 1rem;
+            display: block;
+            font-weight: 500;
+            box-shadow: 0 4px 10px rgba(46, 139, 87, 0.3);
+        }
+        .back-btn:hover {
+            background-color: var(--dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(46, 139, 87, 0.4);
+        }
+    </style>
+</head>
+<body>
+<!-- Floating Icons Background -->
+<div class="floating-icons" role="presentation">
+    <i class="fas fa-leaf icon" style="left: 10%; animation-duration: 20s;"></i>    
+    <i class="fas fa-seedling icon" style="left: 20%; animation-duration: 15s; animation-delay: 1s;"></i>
+    <i class="fas fa-tree icon" style="left: 30%; animation-duration: 25s; animation-delay: 2s;"></i>
+    <i class="fas fa-leaf icon" style="left: 40%; animation-duration: 18s; animation-delay: 3s;"></i>
+    <i class="fas fa-pagelines icon" style="left: 50%; animation-duration: 22s; animation-delay: 4s;"></i>
+    <i class="fas fa-spa icon" style="left: 60%; animation-duration: 19s; animation-delay: 5s;"></i>
+    <i class="fas fa-seedling icon" style="left: 70%; animation-duration: 24s; animation-delay: 6s;"></i>
+    <i class="fas fa-leaf icon" style="left: 80%; animation-duration: 17s; animation-delay: 7s;"></i>
+    <i class="fas fa-pagelines icon" style="left: 90%; animation-duration: 21s; animation-delay: 8s;"></i>
+</div>
+
+<!-- Landing Page -->
+<div class="landing-page" id="landingPage" role="main">
+    <div class="landing-content animate__animated animate__fadeIn">
+        <div class="animate__animated animate__zoomIn" style="animation-delay: 0.3s;" role="img" aria-label="Plant Health Guardian Logo">
+            <i class="fas fa-leaf" style="font-size: 5rem; color: var(--accent); margin-bottom: 1.5rem;"></i>
+        </div>
+        <h1 class="landing-title animate__animated animate__fadeInUp" style="animation-delay: 0.5s;">
+            LeafLens
+        </h1>
+        <p class="landing-subtitle animate__animated animate__fadeInUp" style="animation-delay: 0.7s;">
+            Your ML-based solution for plant disease detection and treatment recommendations
+        </p>
+        <button id="startBtn" class="start-btn animate__animated animate__fadeInUp" style="animation-delay: 0.9s;">
+            Get Started <i class="fas fa-arrow-right" style="margin-left: 0.5rem;"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Main Application -->
+<div class="app-container" id="appContainer">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title">LeafLens - Plant Disease Detection Tool</h1>
+            <p class="card-subtitle">Upload a clear image of the plant leaf to detect diseases and get instant analysis
+                from our advanced ML-based system</p>
+            <div class="header-decoration"></div>
+        </div>
+
+        <div class="card-body">
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="upload-container" role="region" aria-label="Image Upload Area">
+                    <i class="fas fa-cloud-upload-alt upload-icon" aria-hidden="true"></i>
+                    <h3 class="upload-title">Upload Plant Image</h3>
+                    <p style="color: #666; margin-bottom: 1.5rem;">
+                        For best results, please upload a clear and well-lit image of the affected plant leaf
+                    </p>
+                    <input type="file" id="fileInput" name="file" accept="image/*" style="display: none;" aria-label="Choose plant image">
+                    <button type="button" class="upload-btn" onclick="document.getElementById('fileInput').click()" aria-label="Select image to upload">
+                        <i class="fas fa-image" style="margin-right: 0.5rem;" aria-hidden="true"></i> Choose Image
+                    </button>
+                </div>
+
+                <!-- Add error message container -->
+                <div class="error-message" id="errorMessage" role="alert"></div>
+
+                <div class="preview-container" id="previewContainer" role="region" aria-label="Image Preview">
+                    <img id="preview" class="preview-img" alt="Image Preview">
+                    <button type="submit" class="analyze-btn" id="analyzeBtn">
+                        <i class="fas fa-search" style="margin-right: 0.5rem;"></i> Analyze Image
+                    </button>
+                </div>
+            </form>
+
+            <div class="loader" id="loader" role="status" aria-label="Analysis in progress">
+                <div class="loader-spinner"></div>
+                <p class="loader-text">Analyzing your plant image...</p>
+                <p class="loader-subtext">This may take a few moments</p>
+            </div>
+
+            <div class="result-container" id="resultContainer">
+                <div class="result-card">
+                    <h3 class="result-title">Detection Results</h3>
+                    <div class="result-content">
+                        <div class="result-img-container">
+                            <img id="resultImg" class="result-img" alt="Analyzed Plant">
+                        </div>
+                        <div class="result-details">
+                            <div class="detected-disease" id="resultText">
+                                <!-- Removed static content - Will be filled by JavaScript -->
+                            </div>
+                            <div class="confidence-bar-container">
+                                <div class="confidence-bar" id="confidenceBar"></div>
+                            </div>
+                            <div class="confidence-text" id="confidenceText">
+                                <!-- Removed static content - Will be filled by JavaScript -->
+                            </div>
+                            <div class="plant-info">
+                                <h4 class="plant-info-title">Treatment Recommendations</h4>
+                                <div class="treatment-tips" id="treatmentTips">
+                                    <!-- Removed static content - Will be filled by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Supplement Recommendations Section (now below both image and recommendations) -->
+                    <div class="supplement-section" id="supplementSection" style="display:none;">
+                        <div class="supplement-title">Recommended Supplements</div>
+                        <div class="supplement-list" id="supplementList"></div>
+                        <div class="supplement-empty" id="supplementEmpty" style="display:none;"></div>
+                    </div>
+                    <button type="button" class="back-btn" id="resetBtn">
+                        <i class="fas fa-redo" style="margin-right: 0.5rem;"></i> Analyze Another Image
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2025 Plant Health Guardian | All Rights Reserved</p>
+    </div>
+</div>
+
+<script>
+    // Landing Page Animation
+    document.addEventListener('DOMContentLoaded', function () {
+        const landingPage = document.getElementById('landingPage');
+        const appContainer = document.getElementById('appContainer');
+        const startBtn = document.getElementById('startBtn');
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const previewContainer = document.getElementById('previewContainer');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const uploadForm = document.getElementById('uploadForm');
+        const loader = document.getElementById('loader');
+        const resultContainer = document.getElementById('resultContainer');
+        const resultImg = document.getElementById('resultImg');
+        const confidenceBar = document.getElementById('confidenceBar');
+        const resetBtn = document.getElementById('resetBtn');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Start button animation
+        startBtn.addEventListener('click', function () {
+            landingPage.classList.add('animate__animated', 'animate__fadeOut');
+            setTimeout(() => {
+                landingPage.style.display = 'none';
+                appContainer.style.display = 'block';
+                setTimeout(() => {
+                    appContainer.style.opacity = '1';
+                    appContainer.classList.add('animate__animated', 'animate__fadeIn');
+                }, 50);
+            }, 500);
+        });
+
+        // File input change handler
+        fileInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            errorMessage.style.display = 'none';
+
+            if (file) {
+                // Check file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    errorMessage.textContent = 'File size too large. Please select an image under 5MB.';
+                    errorMessage.style.display = 'block';
+                    fileInput.value = '';
+                    return;
+                }
+
+                // Check file type
+                const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+                if (!validTypes.includes(file.type)) {
+                    errorMessage.textContent = 'Please select a valid image file (JPEG, PNG).';
+                    errorMessage.style.display = 'block';
+                    fileInput.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    resultImg.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                    analyzeBtn.style.display = 'block';
+                    previewContainer.classList.add('fade-in');
+                }
+                reader.onerror = function () {
+                    errorMessage.textContent = 'Error reading file. Please try again.';
+                    errorMessage.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Form submit handler
+        uploadForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            if (!fileInput.files[0]) {
+                errorMessage.textContent = 'Please select an image first';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            previewContainer.style.display = 'none';
+            loader.style.display = 'block';
+            errorMessage.style.display = 'none';
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: new FormData(this)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Update results with model predictions
+                document.getElementById('resultText').textContent = `Detected: ${data.class_name}`;
+                document.getElementById('confidenceText').textContent = data.confidence ? `${data.confidence} Accuracy` : '';
+                confidenceBar.style.width = '0';
+
+                // Fetch disease insight from backend
+                const diseaseName = data.class_name;
+                const tipsContainer = document.getElementById('treatmentTips');
+                tipsContainer.innerHTML = '<div style="text-align:center; color: #208b46; font-weight: 500;">Loading disease insight...</div>';
+                fetch('/disease_insight', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ disease_name: diseaseName })
+                })
+                .then(res => res.json())
+                .then(insightData => {
+                    if (insightData.insight && Array.isArray(insightData.insight) && insightData.insight.length > 0) {
+                        const bullets = insightData.insight.map(item => `<li>${item.replace(/^[-•*]\s*/, '')}</li>`).join('');
+                        tipsContainer.innerHTML = `<ul class=\"disease-insight\" style=\"color: #184e77; font-size: 1.1rem; padding-left: 1.2em;\">${bullets}</ul>`;
+                    } else {
+                        tipsContainer.innerHTML = `<div class=\"disease-insight\">No insight available.</div>`;
+                    }
+
+                    // Fetch supplement recommendations from backend
+                    const supplementSection = document.getElementById('supplementSection');
+                    const supplementList = document.getElementById('supplementList');
+                    const supplementEmpty = document.getElementById('supplementEmpty');
+                    supplementSection.style.display = 'block';
+                    supplementList.innerHTML = '';
+                    supplementEmpty.style.display = 'none';
+                    supplementEmpty.textContent = '';
+                    fetch('/supplements', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ disease_name: diseaseName })
+                    })
+                    .then(res => res.json())
+                    .then(supplementData => {
+                        const supplements = supplementData.supplements || [];
+                        if (supplements.length > 0) {
+                            supplementList.innerHTML = supplements.map(supp => `
+                                <div class=\"supplement-card\">
+                                    <img class=\"supplement-img\" src=\"${supp.image_url}\" alt=\"${supp.name}\">
+                                    <div class=\"supplement-info\">
+                                        <div class=\"supplement-name\">${supp.name}</div>
+                                        <a class=\"supplement-link\" href=\"${supp.buy_link}\" target=\"_blank\">Buy Online</a>
+                                    </div>
+                                </div>
+                            `).join('');
+                        } else {
+                            supplementList.innerHTML = '';
+                            supplementEmpty.textContent = 'No supplement recommendations available for this disease.';
+                            supplementEmpty.style.display = 'block';
+                        }
+                    })
+                    .catch(err => {
+                        supplementList.innerHTML = '';
+                        supplementEmpty.textContent = 'Could not fetch supplement recommendations at this time.';
+                        supplementEmpty.style.display = 'block';
+                    });
+                })
+                .catch(err => {
+                    tipsContainer.innerHTML = `<div class="disease-insight">Error fetching insight.</div>`;
+                });
+
+                // Hide loader and show results
+                loader.style.display = 'none';
+                resultContainer.style.display = 'block';
+                resultContainer.style.opacity = '1';
+                resultContainer.classList.add('slide-up');
+
+            } catch (error) {
+                console.error('Error:', error);
+                errorMessage.textContent = 'Error analyzing image: ' + error.message;
+                errorMessage.style.display = 'block';
+                loader.style.display = 'none';
+                previewContainer.style.display = 'block';
+            }
+        });
+
+        // Reset button handler
+        resetBtn.addEventListener('click', function () {
+            fileInput.value = '';
+            preview.src = '';
+            resultContainer.style.display = 'none';
+            resultContainer.style.opacity = '0';
+            previewContainer.style.display = 'none';
+            resultContainer.classList.remove('slide-up');
+            uploadForm.reset();
+        });
+    });
+</script>
+</body>
+</html>
